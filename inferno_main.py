@@ -101,9 +101,11 @@ def cycle_body():
     # запрос газоанализатора
     air_analyser_frame.get_data()
     # частотник 1
-    pass
+    freq_machine_atv212_075.get_data()
     # частотник 2
-    pass
+    freq_machine_atv212_U55.get_data()
+    # частотник 3
+    freq_machine_atv212_HD18.get_data()
     # формирование данных для графика
     main_graph_root.place_data(form_graph_data())
     air_analyser_graph_root.place_data(form_air_graph_data())
@@ -126,8 +128,9 @@ def form_graph_data():
     graph_data[2][1].append(proma2_frame.proma_idm.consumption)  # давление второй помы
     graph_data[3][1].append(pvm_frame.mass)  # давление второй помы
     graph_data[4][1].append(pvm_frame.consumption)  # давление второй помы
-    graph_data[5][1].append(freq_machine_1.fr_machine.freq)  # частота первого частотника
-    graph_data[6][1].append(freq_machine_2.fr_machine.freq)  # частота второго частотника
+    graph_data[5][1].append(freq_machine_atv212_075.fr_machine.freq)  # частота первого частотника
+    graph_data[6][1].append(freq_machine_atv212_U55.fr_machine.freq)  # частота второго частотника
+    graph_data[6][1].append(freq_machine_atv212_HD18.fr_machine.freq)  # частота второго частотника
     [graph_data[i+7][1].append(tmr138_frame.tmr138.temp[i]) for i in range(8)]  # 8 каналов ТМР-138
     return graph_data
 
@@ -199,7 +202,7 @@ pvm_frame = pvm_3m.DataFrame(root, text="Измеритель массы/Рас�
 pvm_frame.place(x=220, y=295)
 
 # окно анализатора
-air_analyser_frame = air_analyser.DataFrame(root, text="Гозоанализатор", id="00A2C0E6", width=200, height=300)
+air_analyser_frame = air_analyser.DataFrame(root, text="Гозо-анализатор", id="00A2C0E6", width=200, height=300)
 air_analyser_frame.place(x=640, y=10)
 
 # частотник 1 - Schnider 0.75kW
@@ -207,12 +210,12 @@ freq_machine_atv212_075 = freq_machine_atv212.DataFrame(root, text="ATV212-H075"
 freq_machine_atv212_075.place(x=430, y=10)
 
 # частотник 2 - Schnider 5.5kW
-freq_machine_atv212_U55 = freq_machine_atv212.DataFrame(root, text="ATV212-HU55", id="013B3000", width=200, height=180)
+freq_machine_atv212_U55 = freq_machine_atv212.DataFrame(root, text="ATV212-HU55", id="013B3C47", width=200, height=180)
 freq_machine_atv212_U55.place(x=430, y=190)
 
-# частотник 3 - Hundai
-freq_machine_atv212_U55 = freq_machine_2.DataFrame(root, text="Hundai", id="00000000", width=200, height=180)
-freq_machine_atv212_U55.place(x=430, y=370)
+# частотник 2 - Schnider 18kW
+freq_machine_atv212_HD18 = freq_machine_atv212.DataFrame(root, text="ATV212-HD18", id="00A2C251", width=200, height=180)
+freq_machine_atv212_HD18.place(x=430, y=370)
 
 # кнопки
 cycle_start_button = tk.Button(root, text='Запуск цикла', command=cycle_start, bg="gray80")
@@ -224,7 +227,7 @@ state_label.place(x=-210, relx=1, rely=1, y=-90, height=25, width=200)
 graph_win_button = tk.Button(root, text='Основные', command=main_graph_win_open, bg="gray80")
 graph_win_button.place(x=-210, relx=1, rely=1, y=-60, height=25, width=95)
 
-graph_win_button = tk.Button(root, text='Газоно-лизатор', command=air_graph_win_open, bg="gray80")
+graph_win_button = tk.Button(root, text='Газо-анализатор', command=air_graph_win_open, bg="gray80")
 graph_win_button.place(x=-105, relx=1, rely=1, y=-60, height=25, width=95)
 
 #  Main

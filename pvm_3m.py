@@ -28,6 +28,7 @@ class DataFrame(tk.LabelFrame):
         self.consumption = 0
         #
         self.set_gui()
+        self.open_id()
 
     def open_id(self):
         com_list = serial.tools.list_ports.comports()
@@ -38,7 +39,8 @@ class DataFrame(tk.LabelFrame):
                 # print(vid_number)
                 if com.vid is not None:
                     if com.vid == int(vid_number, 16) >= 0:
-                        print(com.vid, vid_number)
+                        #
+                        # print(com.vid, vid_number)
                         self.serial.port = com.device
                         self.serial.parity = serial.PARITY_EVEN
                         self.serial.stopbits = serial.STOPBITS_TWO
@@ -88,19 +90,28 @@ class DataFrame(tk.LabelFrame):
         # запрос данных
         data_read = b""
         if self.serial.is_open:
-            self.serial.write(data_to_write)
-            print(">> %.3f" % time.clock(), bytes_array_to_str(data_to_write))
-            data_read = self.serial.read(24)
-            print("<< %.3f" % time.clock(), bytes_array_to_str(data_read))
-            self.state = 1
+            try:
+                self.serial.reset_input_buffer()
+                self.serial.write(data_to_write)
+                # print(">> %.3f" % time.clock(), bytes_array_to_str(data_to_write))
+                data_read = self.serial.read(24)
+                # print(self.serial.in_waiting)
+                # print("<< %.3f" % time.clock(), bytes_array_to_str(data_read))
+                self.state = 1
+            except serial.serialutil.SerialException as error:
+                # print(error)
+                self.state = -1
         else:
             self.state = -1
         #
-        if data_read:
-            self.mass = data_read[5] * 100 + data_read[4] * 10 + data_read[3] * 1 + \
-                        data_read[2] * 0.1 + data_read[1] * 0.01 + data_read[1] * 0.001
-        self.calc_consumption()
-        self.set_gui_data()
+        try:
+            if data_read:
+                self.mass = data_read[5] * 100 + data_read[4] * 10 + data_read[3] * 1 + \
+                            data_read[2] * 0.1 + data_read[1] * 0.01 + data_read[1] * 0.001
+            self.calc_consumption()
+            self.set_gui_data()
+        except IndexError as error:
+            print(error)
         # print(bytes_array_to_str(data_read), self.mass, self.calc_consumption)
         self.state_check()
         pass

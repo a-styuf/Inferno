@@ -38,7 +38,7 @@ class DataFrame(tk.LabelFrame):
         self.set_data_button.place(x=10, y=100, height=20, width=120)
 
         self.freq_var = tk.StringVar()
-        self.freq_var.set(60)
+        self.freq_var.set(5)
         self.freq_entry = tk.Entry(self, textvar=self.freq_var, font=("Helvetica", 10), justify="center")
         self.freq_entry.place(x=140, y=100, height=20, width=45)
         # кнопка переподключения
@@ -126,7 +126,7 @@ class Device:
         com_list = serial.tools.list_ports.comports()
         for com in com_list:
             for serial_number in self.dev_id:
-                print(com.serial_number)
+                # print(com.serial_number)
                 if com.serial_number is not None:
                     if serial_number in com.serial_number:
                         if self.instrument is None:
@@ -136,10 +136,10 @@ class Device:
                             self.dev_port = com.device
                             try:
                                 self.instrument = minimalmodbus.Instrument(com.device, self.mb_addr, mode="rtu")
-                                print(com)
-                                self.instrument.debug = True
+                                # print(com)
+                                self.instrument.debug = False
                             except serial.serialutil.SerialException as error:
-                                print(error)
+                                # print(error)
                                 return 0
                             return 1
         return 0

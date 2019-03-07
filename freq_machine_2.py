@@ -38,7 +38,7 @@ class DataFrame(tk.LabelFrame):
         self.set_data_button.place(x=10, y=100, height=20, width=120)
 
         self.freq_var = tk.StringVar()
-        self.freq_var.set(60)
+        self.freq_var.set(5)
         self.freq_entry = tk.Entry(self, textvar=self.freq_var, font=("Helvetica", 10), justify="center")
         self.freq_entry.place(x=140, y=100, height=20, width=45)
         # кнопка переподключения
@@ -110,7 +110,7 @@ class Device:
                 pass
         self.port = None
         self.debug = False
-        self.br = 19200
+        self.br = 9600
         self.instrument = None
         self.state = 0
         self.freq = 0
@@ -132,7 +132,10 @@ class Device:
                         if self.instrument is None:
                             minimalmodbus.BAUDRATE = self.br
                             minimalmodbus.CLOSE_PORT_AFTER_EACH_CALL = False
-                            minimalmodbus.TIMEOUT = 0.3
+                            minimalmodbus.TIMEOUT = 0.4
+                            minimalmodbus.PARITY = 'N'
+                            minimalmodbus.STOPBITS = 1
+                            minimalmodbus.BYTESIZE = 8
                             self.dev_port = com.device
                             try:
                                 self.instrument = minimalmodbus.Instrument(com.device, self.mb_addr, mode="rtu")
@@ -147,16 +150,10 @@ class Device:
     def read(self, d_type="temp"):
         data = None
         if d_type == "get_freq":
-            addr = 0xFD00  # todo
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
-        elif d_type == "get_sp_freq":
-            addr = 0xFA01  # todo
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
-        elif d_type == "status":
-            addr = 0xFD01  # todo
+            addr = 0x0101  # 0x02 - группа d, 0x01 - установка частоты
             param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
         else:
-            addr = 0xFD00  # todo
+            addr = 0x0101  # todo
             param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
         if param["functioncode"] != 1:
             if d_type == "temp_fp":
@@ -189,14 +186,17 @@ class Device:
         pass
 
     def write(self, data, d_type="set_freq"):
-        if d_type == "set_freq":
-            addr = 0xFA01  # todo
+        if d_type == "set_mode":
+            addr = 0x0301  # 0x03 - группа A, 0x01 - переключение на MB
             param = {"functioncode": 6, "numberOfDecimals": 0, "signed": False}
-        elif d_type == "set_cw":
-            addr = 0xFA00  # todo
+        elif d_type == "com_set_freq":
+            addr = 0x0302  # # 0x03 - группа A, 0x01 - переключение на MB
+            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": False}
+        elif d_type == "set_freq":
+            addr = 0x0303  # # 0x03 - группа A, 0x03 - установка частоты
             param = {"functioncode": 6, "numberOfDecimals": 0, "signed": False}
         else:
-            addr = 0xFA01  # todo
+            addr = 0x0301  # 0x03 - группа A, 0x01 - переключение на MB
             param = {"functioncode": 6, "numberOfDecimals": 0, "signed": False}
         if param["functioncode"] != 1:
             try:
@@ -213,7 +213,8 @@ class Device:
         return data
 
     def write_freq(self, data):
-        self.write(0xC400, d_type="set_cw")  # 0xC400 - run forward, commands and setpoint from ModBus
+        # self.write(0x0002, d_type="set_mode")  # 0xC400 - run forward, commands and setpoint from ModBus
+        # self.write(0x0004, d_type="com_set_freq")  # 0xC400 - run forward, commands and setpoint from ModBus
         self.write(data, d_type="set_freq")
         # self.read(d_type="get_freq")
         pass
@@ -221,10 +222,6 @@ class Device:
     def _data_from_type(self, data, d_type="get_freq"):
         if d_type == "get_freq":
             self.freq = data/100
-        elif d_type == "get_sp_freq":
-            self.sp_freq = data/100
-        elif d_type == "status":
-            self.status = data/100
         else:
             self.freq = data/100
 
