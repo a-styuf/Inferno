@@ -84,22 +84,22 @@ class Channel:
         data = None
         if d_type == "temp":
             addr = 0x0001+(self.in_num-1)*5
-            param = {"functioncode": 4, "numberOfDecimals": 1, "signed": True}
+            param = {"functioncode": 4, "number_of_decimals": 1, "signed": True}
         elif d_type == "error":
             addr = 0x0002 + (self.in_num - 1) * 5
-            param = {"functioncode": 4, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 4, "number_of_decimals": 0, "signed": True}
         elif d_type == "set_point":
             addr = 0x0011 + (self.in_num - 1) * 4
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 3, "number_of_decimals": 0, "signed": True}
         elif d_type == "hyst":
             addr = 0x0031 + (self.in_num - 1) * 4
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 3, "number_of_decimals": 0, "signed": True}
         elif d_type == "out_state":
             addr = 0x0000 + (self.out_num - 1) * 1
             param = {"functioncode": 1}
         else:
             addr = 0x0001 + (self.in_num - 1) * 5
-            param = {"functioncode": 4, "numberOfDecimals": 1, "signed": True}
+            param = {"functioncode": 4, "number_of_decimals": 1, "signed": True}
         if param["functioncode"] != 1:
             try:
                 self._data_from_type(self.device.instr.read_register(addr, **param), d_type=d_type)
@@ -117,19 +117,19 @@ class Channel:
     def write(self, data, d_type="set_point"):
         if d_type == "set_point":
             addr = 0x0011 + (self.in_num - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 0, "signed": True}
         elif d_type == "op_set_point":
             addr = 0x0013 + (self.in_num - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 0, "signed": True}
         elif d_type == "hyst":
             addr = 0x0031 + (self.in_num - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 0, "signed": True}
         elif d_type == "out_state":
             addr = 0x0000 + (self.out_num - 1) * 1
             param = {"functioncode": 5}
         else:
             addr = 0x0011 + (self.in_num - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 1, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 1, "signed": True}
         if param["functioncode"] != 1:
             try:
                 self.device.instr.write_register(addr, data, **param)
@@ -224,28 +224,28 @@ class Device:
         data = None
         if d_type == "temp":
             addr = 0x0001+(ch-1)*5
-            param = {"functioncode": 4, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 4, "number_of_decimals": 0, "signed": True}
         elif d_type == "temp_fp":
             addr = 0x0003+(ch-1)*5
-            param = {"functioncode": 4, "numberOfRegisters": 2}
+            param = {"functioncode": 4, "number_of_registers": 2}
         elif d_type == "numberOfDecimal":
             addr = 0x0000 + (ch - 1) * 5
-            param = {"functioncode": 4, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 4, "number_of_decimals": 0, "signed": True}
         elif d_type == "error":
             addr = 0x0002 + (ch - 1) * 5
-            param = {"functioncode": 4, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 4, "number_of_decimals": 0, "signed": True}
         elif d_type == "set_point":
             addr = 0x0011 + (ch - 1) * 4
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 3, "number_of_decimals": 0, "signed": True}
         elif d_type == "hyst":
             addr = 0x0031 + (ch - 1) * 4
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 3, "number_of_decimals": 0, "signed": True}
         elif d_type == "out_state":
             addr = 0x0000 + (ch - 1) * 1
             param = {"functioncode": 1}
         else:
             addr = 0x0001 + (ch - 1) * 5
-            param = {"functioncode": 4, "numberOfDecimals": 1, "signed": True}
+            param = {"functioncode": 4, "number_of_decimals": 1, "signed": True}
         if param["functioncode"] != 1:
             if d_type == "temp_fp":
                 try:
@@ -279,22 +279,22 @@ class Device:
     def write(self, data, d_type="set_point", ch=1):
         if d_type == "set_point":
             addr = 0x0011 + (ch - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 0, "signed": True}
         elif d_type == "op_set_point":
             addr = 0x0013 + (ch - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 0, "signed": True}
         elif d_type == "numberOfDecimal":
             addr = 0x0010 + (ch - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 0, "signed": True}
         elif d_type == "hyst":
             addr = 0x0031 + (ch - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 0, "signed": True}
         elif d_type == "out_state":
             addr = 0x0000 + (ch - 1) * 1
             param = {"functioncode": 5}
         else:
             addr = 0x0011 + (ch - 1) * 4
-            param = {"functioncode": 6, "numberOfDecimals": 1, "signed": True}
+            param = {"functioncode": 6, "number_of_decimals": 1, "signed": True}
         if param["functioncode"] != 1:
             try:
                 self.instrument.write_register(addr, data, **param)

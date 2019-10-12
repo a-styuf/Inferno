@@ -8,7 +8,7 @@ import pvm_3m
 import air_analyser
 import os
 import freq_machine_atv212
-import freq_machine_2
+
 
 cycle_after_id = 0
 graph_data = [

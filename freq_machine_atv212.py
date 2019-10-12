@@ -148,16 +148,16 @@ class Device:
         data = None
         if d_type == "get_freq":
             addr = 0xFD00  # todo
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
+            param = {"functioncode": 3, "number_of_decimals ": 0, "signed": False}
         elif d_type == "get_sp_freq":
             addr = 0xFA01  # todo
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
+            param = {"functioncode": 3, "number_of_decimals ": 0, "signed": False}
         elif d_type == "status":
             addr = 0xFD01  # todo
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
+            param = {"functioncode": 3, "number_of_decimals ": 0, "signed": False}
         else:
             addr = 0xFD00  # todo
-            param = {"functioncode": 3, "numberOfDecimals": 0, "signed": False}
+            param = {"functioncode": 3, "number_of_decimals ": 0, "signed": False}
         if param["functioncode"] != 1:
             if d_type == "temp_fp":
                 try:
@@ -191,13 +191,13 @@ class Device:
     def write(self, data, d_type="set_freq"):
         if d_type == "set_freq":
             addr = 0xFA01  # todo
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": False}
+            param = {"functioncode": 6, "number_of_decimals ": 0, "signed": False}
         elif d_type == "set_cw":
             addr = 0xFA00  # todo
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": False}
+            param = {"functioncode": 6, "number_of_decimals ": 0, "signed": False}
         else:
             addr = 0xFA01  # todo
-            param = {"functioncode": 6, "numberOfDecimals": 0, "signed": False}
+            param = {"functioncode": 6, "number_of_decimals ": 0, "signed": False}
         if param["functioncode"] != 1:
             try:
                 self.instrument.write_register(addr, data, **param)
