@@ -48,7 +48,7 @@ class DataFrame(tk.LabelFrame):
         self.addr_entry = tk.Entry(self, textvar=self.addr_var, bg="gray80", justify="center")
         self.addr_entry.place(relx=0.5, x=5, y=200, height=20, relwidth=0.5, width=-10)
         # отображение состояния
-        self.state_label = tk.Label(self, text="ГАЗОНО-ЛИЗАТОР", font=("Helvetica", 9), justify="center")
+        self.state_label = tk.Label(self, text="Газоанализатор", font=("Helvetica", 9), justify="center")
         self.state_label.place(relx=0.0, x=5, y=5, height=20, width=115)
         # задание id AC04
         self.id_var = tk.StringVar()

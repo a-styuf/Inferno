@@ -172,7 +172,7 @@ def create_log_file(dir_name="tmp", name="tmp"):
 
 # саздание основного окна для tkinter
 root = tk.Tk()
-root.title("Inferno - Дожигатель дожигаемого.")
+root.title("Inferno v1.2")
 root.geometry('850x550')
 root.resizable(False, False)
 root.config(bg="grey95")
@@ -181,7 +181,7 @@ root.config(bg="grey95")
 main_graph_root = gw.GraphWindow(root)
 
 # окно с графиками
-air_analyser_graph_root = gw.GraphWindow(root, title="Газоно-лизатор")
+air_analyser_graph_root = gw.GraphWindow(root, title="Газоанализатор")
 
 # окно расходомера 1
 proma1_frame = proma_idm.DataFrame(root, text="Расходомер 1", id="013B3AB7", addr=2, width=200, height=200,
@@ -202,7 +202,7 @@ pvm_frame = pvm_3m.DataFrame(root, text="Измеритель массы/Рас�
 pvm_frame.place(x=220, y=295)
 
 # окно анализатора
-air_analyser_frame = air_analyser.DataFrame(root, text="Гозо-анализатор", id="00A2C0E6", width=200, height=300)
+air_analyser_frame = air_analyser.DataFrame(root, text="Газоанализатор", id="00A2C0E6", width=200, height=300)
 air_analyser_frame.place(x=640, y=10)
 
 # частотник 1 - Schnider 0.75kW
@@ -227,7 +227,7 @@ state_label.place(x=-210, relx=1, rely=1, y=-90, height=25, width=200)
 graph_win_button = tk.Button(root, text='Основные', command=main_graph_win_open, bg="gray80")
 graph_win_button.place(x=-210, relx=1, rely=1, y=-60, height=25, width=95)
 
-graph_win_button = tk.Button(root, text='Газо-анализатор', command=air_graph_win_open, bg="gray80")
+graph_win_button = tk.Button(root, text='Газоанализатор', command=air_graph_win_open, bg="gray80")
 graph_win_button.place(x=-105, relx=1, rely=1, y=-60, height=25, width=95)
 
 #  Main

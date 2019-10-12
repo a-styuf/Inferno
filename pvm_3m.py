@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
     # саздание основного окна для tkinter
     root = tk.Tk()
-    root.title("Inferno - Дожигатель дожигаемого.")
+    root.title("Inferno v1.2")
     root.geometry('210x135')
     root.resizable(False, False)
     root.config(bg="grey95")
