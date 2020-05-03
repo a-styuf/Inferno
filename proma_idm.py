@@ -60,9 +60,9 @@ class DataFrame(tk.LabelFrame):
         #
         self.cfg_dict["ac-04 serial number"] = self.id
         #
-        self.cfg_dict["a"] = "%f" % self.a
+        self.cfg_dict["a"] = self.a
         #
-        self.cfg_dict["k"] = "%f" % self.k
+        self.cfg_dict["k"] = self.k
         #
         print("%s: get cfg - " % self.name, self.cfg_dict)
         return self.cfg_dict
@@ -76,8 +76,15 @@ class DataFrame(tk.LabelFrame):
             self.id = self.cfg_dict.get("ac-04 serial number", self.id)
             self.a = self.cfg_dict.get("a", self.a)
             self.k = self.cfg_dict.get("k", self.k)
+            #
+            self.set_param_to_gui()
         else:
             pass
+
+    def set_param_to_gui(self):
+        self.k_var.set(self.k)
+        self.a_var.set(self.a)
+        self.id_var.set(self.id)
 
     def set_gui(self):
         # таблица с данными

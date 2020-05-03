@@ -61,8 +61,13 @@ class DataFrame(tk.LabelFrame):
             self.addr = int(self.cfg_dict.get("address", self.addr))
             self.br = int(self.cfg_dict.get("baudrate", self.br))
             self.id = self.cfg_dict.get("ac-04 serial number", self.id)
+            #
+            self.set_param_to_gui()
         else:
             pass
+
+    def set_param_to_gui(self):
+        self.id_var.set(self.id)
 
     def set_gui(self):
         # таблица с данными

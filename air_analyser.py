@@ -69,8 +69,14 @@ class DataFrame(tk.LabelFrame):
             self.addr = int(self.cfg_dict.get("address", self.addr))
             self.br = int(self.cfg_dict.get("baudrate", self.br))
             self.id = self.cfg_dict.get("ac-04 serial number", self.id)
+            #
+            self.set_param_to_gui()
         else:
             pass
+
+    def set_param_to_gui(self):
+        self.id_var.set(self.id)
+        self.addr_var.set(self.addr)
 
     def set_gui(self):
         # таблица с данными
@@ -85,7 +91,7 @@ class DataFrame(tk.LabelFrame):
         self.reconnect_button.place(relx=0.0, x=5, y=200, height=20, relwidth=0.5, width=-10)
         self.addr_var = tk.StringVar()
         self.addr_var.set(self.addr)
-        self.addr_entry = tk.Entry(self, textvar=self.addr_var, bg="gray80", justify="center")
+        self.addr_entry = tk.Entry(self, textvar=self.addr_var, bg="gray80", justify="center", state="disable")
         self.addr_entry.place(relx=0.5, x=5, y=200, height=20, relwidth=0.5, width=-10)
         # отображение состояния
         self.state_label = tk.Label(self, text="Газоанализатор", font=("Helvetica", 9), justify="center")
@@ -101,7 +107,7 @@ class DataFrame(tk.LabelFrame):
         if br:
             self.br = br
         if dev_id:
-            self.id = [dev_id]
+            self.id = dev_id
         if address:
             self.addr = address
         self.state = self._connect_serial_by_ser_num()
@@ -110,7 +116,7 @@ class DataFrame(tk.LabelFrame):
     def _connect_serial_by_ser_num(self):  # функция для установки связи с устройством по его ID
         com_list = serial.tools.list_ports.comports()
         for com in com_list:
-            for serial_number in self.id:
+            for serial_number in [self.id]:
                 if com.serial_number is not None:
                     if com.serial_number in serial_number:
                         if self.instrument is None:

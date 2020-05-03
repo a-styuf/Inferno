@@ -13,7 +13,7 @@ import mv110
 
 
 debug = False
-version = "v1.3.2"
+version = "v1.3.3"
 
 
 cycle_after_id = 0
@@ -221,7 +221,7 @@ proma1_frame = proma_idm.DataFrame(root, text="Расходомер",
                                    name="PROMA-IDM 1",
                                    id="013B3AB7", addr=2, br=9600,
                                    a=6.9513, k=0.4851,
-                                   debug = debug,
+                                   debug=debug,
                                    width=200, height=200
                                    )
 proma1_frame.place(x=10, y=5)
@@ -232,7 +232,7 @@ proma2_frame = proma_idm.DataFrame(root, text="Расходомер",
                                    name="PROMA-IDM 2",
                                    id="013B3C31", addr=3, br=9600,
                                    a=27.812, k=0.4855,
-                                   debug = debug,
+                                   debug=debug,
                                    width=200, height=200
                                    )
 proma2_frame.place(x=10, y=210)
@@ -243,7 +243,7 @@ pvm_frame = pvm_3m.DataFrame(root, text="Расходомер",
                              name="PVM-3M",
                              vid="1A86", pid="7523", br=4800,
                              filter_points=10,
-                             debug = debug,
+                             debug=debug,
                              width=200, height=125)
 pvm_frame.place(x=10, y=415)
 devices.append(pvm_frame)
@@ -252,7 +252,7 @@ devices.append(pvm_frame)
 tmr138_frame = trm138.DataFrame(root, text="Измеритель температуры",
                                 name="TMR138",
                                 id="013B3BBA", addr=8, br=9600,
-                                debug = debug,
+                                debug=debug,
                                 width=200, height=250)
 tmr138_frame.place(x=220, y=10)
 devices.append(tmr138_frame)
@@ -261,7 +261,7 @@ devices.append(tmr138_frame)
 mv110_frame = mv110.DataFrame(root, text="Измеритель температуры",
                               name="MB110",
                               id="01688B11", addr=16, br=115200,
-                              debug = debug,
+                              debug=debug,
                               width=200, height=250)
 mv110_frame.place(x=220, y=290)
 devices.append(mv110_frame)
@@ -271,7 +271,7 @@ air_analyser_frame = air_analyser.DataFrame(root, text="Газоанализат
                                             name="Air analyzer",
                                             id="00A2C0E6",
                                             addr=1, br=9600,
-                                            debug = debug,
+                                            debug=debug,
                                             width=200, height=250)
 air_analyser_frame.place(x=640, y=10)
 devices.append(air_analyser_frame)
@@ -281,7 +281,7 @@ freq_machine_atv212_075 = freq_machine_atv212.DataFrame(root, text="Преобр
                                                         name="ATV212-H075",
                                                         id="013B3BC1",
                                                         addr=1, br=9600,
-                                                        debug = debug,
+                                                        debug=debug,
                                                         width=200, height=180)
 freq_machine_atv212_075.place(x=430, y=10)
 devices.append(freq_machine_atv212_075)
@@ -291,7 +291,7 @@ freq_machine_atv212_U55 = freq_machine_atv212.DataFrame(root, text="Преобр
                                                         name="ATV212-HU55",
                                                         id="013B3C47",
                                                         addr=1, br=9600,
-                                                        debug = debug,
+                                                        debug=debug,
                                                         width=200, height=180)
 freq_machine_atv212_U55.place(x=430, y=190)
 devices.append(freq_machine_atv212_U55)

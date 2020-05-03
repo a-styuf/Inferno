@@ -109,8 +109,13 @@ class DataFrame(tk.LabelFrame):
             self.vid = self.cfg_dict.get("vid", self.vid)
             self.pid = self.cfg_dict.get("pid", self.pid)
             self.filter_points = int(self.cfg_dict.get("consumption filter points", self.filter_points))
+            #
+            self.set_param_to_gui()
         else:
             pass
+
+    def set_param_to_gui(self):
+        pass
 
     def set_gui(self):
         # таблица с данными
