@@ -7,35 +7,50 @@ import serial.tools.list_ports
 
 class DataFrame(tk.LabelFrame):
     def __init__(self, root, **kw):
+        self.name = "PVM_3M"
+        self.vid = "1A86"
+        self.pid = "7523"
+        self.br = 4800
+        self.filter_points = 10  # количество точек для подсчета расхода
+        self.debug = False
+        for key in sorted(kw):
+            if key == "name":
+                self.name = kw.pop(key)
+            elif key == "vid":
+                self.vid = kw.pop(key)
+            elif key == "pid":
+                self.pid = kw.pop(key)
+            elif key == "br":
+                self.br = kw.pop(key)
+            elif key == "filter_points":
+                self.filter_points = kw.pop(key)
+            if key == "debug":
+                self.debug = kw.pop(key)
+        #
         self.root = root
         tk.LabelFrame.__init__(self, self.root, kw)
-        self.serial_numbers = []  # это лист возможных серийников!!! (не строка)
-        self.vid_numbers = ["1A86"]
-        self.pid_numbers = ["7523"]
-        self.baudrate = 4800
         self.timeout = 0.2
         self.port = "COM0"
         self.serial = serial.Serial()
         self.state = 0
         self.error_string = "Ок"
-        self.addr = 0x00
         # data
         self.data_field = [[], [], []]
         self.mass = 0
         self.mass_list = []
         self.time_list = []
-        self.consumption_lpf = 10
         self.consumption = 0
         #
+        self.set_cfg()
         self.set_gui()
-        self.open_id()
+        # self.open_id()
 
     def open_id(self):
         com_list = serial.tools.list_ports.comports()
         # print(com_list)
         for com in com_list:
             # print(com.vid)
-            for vid_number in self.vid_numbers:
+            for vid_number in [self.vid]:
                 # print(vid_number)
                 if com.vid is not None:
                     if com.vid == int(vid_number, 16) >= 0:
@@ -45,7 +60,7 @@ class DataFrame(tk.LabelFrame):
                         self.serial.parity = serial.PARITY_EVEN
                         self.serial.stopbits = serial.STOPBITS_TWO
                         self.serial.timeout = self.timeout
-                        self.serial.baudrate = self.baudrate
+                        self.serial.baudrate = self.br
                         try:
                             self.serial.open()
                         except serial.serialutil.SerialException as error:
@@ -58,6 +73,44 @@ class DataFrame(tk.LabelFrame):
         self.state_check()
         return False
         pass
+
+    def connect(self):
+        try:
+            self.disconnect()
+        except:
+            pass
+        self.open_id()
+        self.state_check()
+        try:
+            print("%s: connect" % self.name, "\t", self.serial)
+        except AttributeError:
+            print("%s: connect errror" % self.name)
+
+    def get_cfg(self):
+        self.cfg_dict = {}
+        self.cfg_dict["name"] = self.name
+        #
+        self.cfg_dict["baudrate"] = "%d" % self.br
+        #
+        self.cfg_dict["vid"] = self.vid
+        #
+        self.cfg_dict["pid"] = self.pid
+        #
+        self.cfg_dict["consumption filter points"] = "%d" % self.filter_points
+        #
+        print("%s: get cfg - " % self.name, self.cfg_dict)
+        return self.cfg_dict
+
+    def set_cfg(self, cfg=None):
+        if cfg:
+            self.cfg_dict = cfg
+            self.name = self.cfg_dict.get("name", self.name)
+            self.br = int(self.cfg_dict.get("baudrate", self.br))
+            self.vid = self.cfg_dict.get("vid", self.vid)
+            self.pid = self.cfg_dict.get("pid", self.pid)
+            self.filter_points = int(self.cfg_dict.get("consumption filter points", self.filter_points))
+        else:
+            pass
 
     def set_gui(self):
         # таблица с данными
@@ -120,9 +173,9 @@ class DataFrame(tk.LabelFrame):
         self.mass_list.append(self.mass)
         self.time_list.append(time.clock()/3600)
         if len(self.mass_list) > 1:
-            while len(self.mass_list) > self.consumption_lpf:
+            while len(self.mass_list) > self.filter_points:
                 self.mass_list.pop(0)
-            while len(self.time_list) > self.consumption_lpf:
+            while len(self.time_list) > self.filter_points:
                 self.time_list.pop(0)
             consumption_list = []
             for i in range(len(self.mass_list)-1):

@@ -7,15 +7,24 @@ import struct
 
 class DataFrame(tk.LabelFrame):
     def __init__(self, root, **kw):
+        self.name = "PROMA-IDM"
         self.id = "013B3AB7"
+        self.br = 9600
         self.addr = 2
+        self.debug = False
         self.a = 6.9513
         self.k = 0.4851
         for key in sorted(kw):
-            if key == "id":
+            if key == "name":
+                self.name = kw.pop(key)
+            elif key == "id":
                 self.id = kw.pop(key)
             elif key == "addr":
                 self.addr = kw.pop(key)
+            elif key == "br":
+                self.br = kw.pop(key)
+            elif key == "debug":
+                self.debug = kw.pop(key)
             elif key == "a":
                 self.a = kw.pop(key)
             elif key == "k":
@@ -25,8 +34,50 @@ class DataFrame(tk.LabelFrame):
         self.root = root
         self.proma_idm = Data(proma_id=self.id, addr=self.addr, a=self.a, k=self.k)
         tk.LabelFrame.__init__(self, self.root, kw)
+        self.set_cfg()
         self.set_gui()
         self.state_check()
+
+    def connect(self):
+        #
+        self.proma_idm.a = self.a
+        self.proma_idm.k = self.k
+        #
+        self.proma_idm.init_mb(br=self.br, dev_id=self.id, address=self.addr)
+        self.state_check()
+        try:
+            print("%s: connect" % self.name, "\t", self.proma_idm.instrument.serial)
+        except AttributeError:
+            print("%s: connect errror" % self.name)
+
+    def get_cfg(self):
+        self.cfg_dict = {}
+        self.cfg_dict["name"] = self.name
+        #
+        self.cfg_dict["address"] = "%d" % self.addr
+        #
+        self.cfg_dict["baudrate"] = "%d" % self.br
+        #
+        self.cfg_dict["ac-04 serial number"] = self.id
+        #
+        self.cfg_dict["a"] = "%f" % self.a
+        #
+        self.cfg_dict["k"] = "%f" % self.k
+        #
+        print("%s: get cfg - " % self.name, self.cfg_dict)
+        return self.cfg_dict
+
+    def set_cfg(self, cfg=None):
+        if cfg:
+            self.cfg_dict = cfg
+            self.name = self.cfg_dict.get("name", self.name)
+            self.addr = int(self.cfg_dict.get("address", self.addr))
+            self.br = int(self.cfg_dict.get("baudrate", self.br))
+            self.id = self.cfg_dict.get("ac-04 serial number", self.id)
+            self.a = self.cfg_dict.get("a", self.a)
+            self.k = self.cfg_dict.get("k", self.k)
+        else:
+            pass
 
     def set_gui(self):
         # таблица с данными
@@ -34,10 +85,10 @@ class DataFrame(tk.LabelFrame):
         self.table.place(x=10, y=30)
         self.set_gui_data()
         # запрос данных
-        self.get_data_button = tk.Button(self, text='Получить', command=self.get_data, bg="gray80")
+        self.get_data_button = tk.Button(self, text='Данные', command=self.get_data, bg="gray80")
         self.get_data_button.place(relx=0, x=5, y=120, height=20, relwidth=0.5, width=-10)
 
-        self.calibr_data_button = tk.Button(self, text='Использовать', command=self.get_calibr_data, bg="gray80")
+        self.calibr_data_button = tk.Button(self, text='Уст. калибр.', command=self.get_calibr_data, bg="gray80")
         self.calibr_data_button.place(relx=0.5, x=5, y=120, height=20, relwidth=0.5, width=-10)
         # # установка границ
         # self.set_data_button = tk.Button(self, text='Установить', command=self.set_data, bg="gray80")
@@ -56,16 +107,16 @@ class DataFrame(tk.LabelFrame):
         self.k_entry = tk.Entry(self, textvar=self.k_var, bg="gray80", justify="center")
         self.k_entry.place(relx=0.5, x=5, y=90, height=20, relwidth=0.5, width=-10)
         # переподключиться
-        self.reconnect_button = tk.Button(self, text='Подключить', command=self.reconnect, bg="gray80")
+        self.reconnect_button = tk.Button(self, text='Подключение', command=self.reconnect, bg="gray80")
         self.reconnect_button.place(relx=0.0, x=5, y=150, height=20, relwidth=0.5, width=-10)
         self.addr_var = tk.StringVar()
         self.addr_var.set(self.addr)
         self.addr_entry = tk.Entry(self, textvar=self.addr_var, bg="gray80", justify="center")
         self.addr_entry.place(relx=0.5, x=5, y=150, height=20, relwidth=0.5, width=-10)
         # отображение состояния
-        self.state_label = tk.Label(self, text="ПРОМА-ИДМ", font=("Helvetica", 10), justify="center")
+        self.state_label = tk.Label(self, text=self.name, font=("Helvetica", 10), justify="center")
         self.state_label.place(relx=0.0, x=5, y=5, height=20, width=100)
-        # задание id AC04
+        # отображение id AC04
         self.id_var = tk.StringVar()
         self.id_var.set(self.id)
         self.id_entry = tk.Entry(self, textvar=self.id_var, font=("Helvetica", 10), justify="center")
@@ -149,24 +200,30 @@ class Data:
         self.init_mb()
         pass
 
-    def init_mb(self, br=9600):
-        self.dev_br = br
-        self.state = self.connect_serial_by_ser_num()
+    def init_mb(self, br=None, dev_id=None, address=None):
+        if br:
+            self.br = br
+        if dev_id:
+            self.dev_id = [dev_id]
+        if address:
+            self.mb_addr = address
+        self.state = self._connect_serial_by_ser_num()
         return self.state
 
-    def connect_serial_by_ser_num(self):  # функция для установки связи с устройством по его ID
+    def _connect_serial_by_ser_num(self):  # функция для установки связи с устройством по его ID
         com_list = serial.tools.list_ports.comports()
         for com in com_list:
             for serial_number in self.dev_id:
                 if com.serial_number is not None:
                     if com.serial_number in serial_number:
                         if self.instrument is None:
-                            minimalmodbus.BAUDRATE = self.dev_br
-                            minimalmodbus.CLOSE_PORT_AFTER_EACH_CALL = False
                             self.dev_port = com.device
                             try:
                                 self.instrument = minimalmodbus.Instrument(com.device, self.mb_addr, mode="rtu")
-                                self.instrument.debug = False
+                                self.instrument.debug = self.debug
+                                self.instrument.close_port_after_each_call = False
+                                self.instrument.serial.baudrate = self.br
+                                self.instrument.serial.timeout = 0.25
                             except serial.serialutil.SerialException:
                                 return -1
                             return 1

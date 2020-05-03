@@ -9,21 +9,60 @@ import time
 
 class DataFrame(tk.LabelFrame):
     def __init__(self, root, **kw):
-        self.id = "00000000"  # todo
+        self.name = "ATV212"
+        self.id = "013B3BC1"
         self.addr = 1
+        self.br = 9600
+        self.debug = False
         for key in sorted(kw):
+            if key == "name":
+                self.name = kw.pop(key)
             if key == "id":
                 self.id = kw.pop(key)
-            elif key == "addr":
+            if key == "addr":
                 self.addr = kw.pop(key)
-            else:
-                pass
+            if key == "br":
+                self.br = kw.pop(key)
+            if key == "debug":
+                self.debug = kw.pop(key)
         self.root = root
         self.fr_machine = Device(addr=self.addr, id=self.id)
         self.freq_def = {"min": 0, "def": 0, "max": 50}
         tk.LabelFrame.__init__(self, self.root, kw)
+        self.set_cfg()
         self.set_gui()
         self.state_check()
+
+    def connect(self):
+        self.fr_machine.init_mb(br=self.br, dev_id=self.id, address=self.addr)
+        self.state_check()
+        try:
+            print("%s: connect" % self.name, "\t", self.fr_machine.instrument.serial)
+        except AttributeError:
+            print("%s: connect errror" % self.name)
+
+    def get_cfg(self):
+        self.cfg_dict = {}
+        self.cfg_dict["name"] = self.name
+        #
+        self.cfg_dict["address"] = "%d" % self.addr
+        #
+        self.cfg_dict["baudrate"] = "%d" % self.br
+        #
+        self.cfg_dict["ac-04 serial number"] = self.id
+        #
+        print("%s: get cfg - " % self.name, self.cfg_dict)
+        return self.cfg_dict
+
+    def set_cfg(self, cfg=None):
+        if cfg:
+            self.cfg_dict = cfg
+            self.name = self.cfg_dict.get("name", self.name)
+            self.addr = int(self.cfg_dict.get("address", self.addr))
+            self.br = int(self.cfg_dict.get("baudrate", self.br))
+            self.id = self.cfg_dict.get("ac-04 serial number", self.id)
+        else:
+            pass
 
     def set_gui(self):
         # таблица с данными
@@ -42,12 +81,12 @@ class DataFrame(tk.LabelFrame):
         self.freq_entry = tk.Entry(self, textvar=self.freq_var, font=("Helvetica", 10), justify="center")
         self.freq_entry.place(x=140, y=100, height=20, width=45)
         # кнопка переподключения
-        self.connect_button = tk.Button(self, text='Переподключение', command=self.connect, bg="gray80")
+        self.connect_button = tk.Button(self, text='Подключение', command=self.connect, bg="gray80")
         self.connect_button.place(x=10, y=130, height=20, width=180)
         # отображение состояния
-        self.state_label = tk.Label(self, text="Частотник", font=("Helvetica", 10))
+        self.state_label = tk.Label(self, text=self.name, font=("Helvetica", 10))
         self.state_label.place(relx=0.0, x=5, y=5, height=20, width=100)
-        # задание id AC04
+        # отображение id AC04
         self.id_var = tk.StringVar()
         self.id_var.set(self.id)
         self.id_entry = tk.Entry(self, textvar=self.id_var, font=("Helvetica", 10), justify="center")
@@ -59,10 +98,6 @@ class DataFrame(tk.LabelFrame):
             self.table.cells[0][i].value.set(self.fr_machine.data_field[0][i])
             self.table.cells[1][i].value.set(self.fr_machine.data_field[1][i])
         pass
-
-    def connect(self):
-        self.fr_machine.init_mb()
-        self.state_check()
 
     def state_check(self):
         if self.fr_machine.state == 1:
@@ -101,11 +136,14 @@ class Device:
     def __init__(self, **kw):
         self.dev_id = ["00000000"]
         self.mb_addr = 8
+        self.debug = False
         for key in sorted(kw):
             if key == "id":
                 self.dev_id = [kw.pop(key)]
             elif key == "addr":
                 self.mb_addr = kw.pop(key)
+            elif key == "debug":
+                self.debug = kw.pop(key)
             else:
                 pass
         self.port = None
@@ -115,10 +153,14 @@ class Device:
         self.state = 0
         self.freq = 0
         self.data_field = [[], [], []]
-        self.init_mb()
 
-    def init_mb(self, br=19200):
-        self.br = br
+    def init_mb(self, br=None, dev_id=None, address=None):
+        if br:
+            self.br = br
+        if dev_id:
+            self.dev_id = [dev_id]
+        if address:
+            self.mb_addr = address
         self.state = self._connect_serial_by_ser_num()
         return self.state
 
@@ -130,14 +172,13 @@ class Device:
                 if com.serial_number is not None:
                     if serial_number in com.serial_number:
                         if self.instrument is None:
-                            minimalmodbus.BAUDRATE = self.br
-                            minimalmodbus.CLOSE_PORT_AFTER_EACH_CALL = False
-                            minimalmodbus.TIMEOUT = 0.3
                             self.dev_port = com.device
                             try:
                                 self.instrument = minimalmodbus.Instrument(com.device, self.mb_addr, mode="rtu")
-                                # print(com)
-                                self.instrument.debug = False
+                                self.instrument.debug = self.debug
+                                self.instrument.close_port_after_each_call = False
+                                self.instrument.serial.baudrate = self.br
+                                self.instrument.serial.timeout = 0.25
                             except serial.serialutil.SerialException as error:
                                 # print(error)
                                 return 0

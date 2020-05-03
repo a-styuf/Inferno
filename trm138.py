@@ -9,20 +9,64 @@ import time
 
 class DataFrame(tk.LabelFrame):
     def __init__(self, root, **kw):
+        self.name = "ТРМ138"
         self.id = "013B3BBA"
         self.addr = 8
+        self.br = 9600
+        self.debug = False
         for key in sorted(kw):
+            if key == "name":
+                self.name = kw.pop(key)
             if key == "id":
                 self.id = kw.pop(key)
-            elif key == "addr":
+            if key == "addr":
                 self.addr = kw.pop(key)
-            else:
-                pass
+            if key == "br":
+                self.br = kw.pop(key)
+            if key == "debug":
+                self.debug = kw.pop(key)
+        #
         self.root = root
-        self.tmr138 = Device(addr=self.addr, id=self.id)
+        self.trm138 = Device(debug=self.debug)
+        # загрузка параметров
+        self.set_cfg()
+        #
         tk.LabelFrame.__init__(self, self.root, kw)
+        #
         self.set_gui()
         self.state_check()
+        self.cfg_dict = None
+
+    def connect(self):
+        self.trm138.init_mb(br=self.br, dev_id=self.id, address=self.addr)
+        self.state_check()
+        try:
+            print("%s: connect" % self.name, "\t", self.trm138.instrument.serial)
+        except AttributeError:
+            print("%s: connect errror" % self.name)
+
+    def get_cfg(self):
+        self.cfg_dict = {}
+        self.cfg_dict["name"] = self.name
+        #
+        self.cfg_dict["address"] = "%d" % self.addr
+        #
+        self.cfg_dict["baudrate"] = "%d" % self.br
+        #
+        self.cfg_dict["ac-04 serial number"] = self.id
+        #
+        print("%s: get cfg - " % self.name, self.cfg_dict)
+        return self.cfg_dict
+
+    def set_cfg(self, cfg=None):
+        if cfg:
+            self.cfg_dict = cfg
+            self.name = self.cfg_dict.get("name", self.name)
+            self.addr = int(self.cfg_dict.get("address", self.addr))
+            self.br = int(self.cfg_dict.get("baudrate", self.br))
+            self.id = self.cfg_dict.get("ac-04 serial number", self.id)
+        else:
+            pass
 
     def set_gui(self):
         # таблица с данными
@@ -30,13 +74,13 @@ class DataFrame(tk.LabelFrame):
         self.table.place(x=10, y=30)
         self.set_gui_data()
         # запрос данных
-        self.get_data_button = tk.Button(self, text='Получить данные', command=self.get_data, bg="gray80")
-        self.get_data_button.place(x=10, y=200, height=20, width=150)
+        self.get_data_button = tk.Button(self, text='Данные', command=self.get_data, bg="gray80")
+        self.get_data_button.place(x=10, y=190, height=20, width=80)
         # кнопка переподключения
-        self.get_data_button = tk.Button(self, text='Переподключение', command=self.get_data, bg="gray80")
-        self.get_data_button.place(x=10, y=230, height=20, width=150)
+        self.connect_button = tk.Button(self, text='Подключить', command=self.connect, bg="gray80")
+        self.connect_button.place(x=100, y=190, height=20, width=80)
         # отображение состояния
-        self.state_label = tk.Label(self, text="ТМР138", font=("Helvetica", 10))
+        self.state_label = tk.Label(self, text=self.name, font=("Helvetica", 10))
         self.state_label.place(relx=0.0, x=5, y=5, height=20, width=100)
         # задание id AC04
         self.id_var = tk.StringVar()
@@ -45,25 +89,25 @@ class DataFrame(tk.LabelFrame):
         self.id_entry.place(relx=1.0, x=-95, y=5, height=20, width=90)
 
     def set_gui_data(self):
-        self.tmr138.create_data()
+        self.trm138.create_data()
         for i in range(len(self.table.cells[0])):
-            self.table.cells[0][i].value.set(self.tmr138.data_field[0][i])
-            self.table.cells[1][i].value.set(self.tmr138.data_field[1][i])
+            self.table.cells[0][i].value.set(self.trm138.data_field[0][i])
+            self.table.cells[1][i].value.set(self.trm138.data_field[1][i])
         pass
 
     def state_check(self):
-        if self.tmr138.state == 1:
+        if self.trm138.state == 1:
             self.state_label.configure(bg="PaleGreen3")
-        elif self.tmr138.state == -1:
+        elif self.trm138.state == -1:
             self.state_label.configure(bg="coral2")
-        elif self.tmr138.state == 0:
+        elif self.trm138.state == 0:
             self.state_label.configure(bg="gray")
         else:
             self.state_label.configure(bg="gray")
         pass
 
     def get_data(self):
-        self.tmr138.read_all_temp()
+        self.trm138.read_all_temp()
         self.set_gui_data()
         self.state_check()
         pass
@@ -168,16 +212,21 @@ class Device:
     def __init__(self, **kw):
         self.dev_id = ["013B3AB7"]
         self.mb_addr = 8
+        self.br = 9600
+        self.debug = False
         for key in sorted(kw):
             if key == "id":
                 self.dev_id = [kw.pop(key)]
             elif key == "addr":
                 self.mb_addr = kw.pop(key)
+            elif key == "br":
+                self.br = kw.pop(key)
+            elif key == "debug":
+                self.debug = kw.pop(key)
             else:
                 pass
         self.port = None
-        self.debug = False
-        self.br = 9600
+        self.debug = True
         self.instrument = None
         self.row_temp = [0 for i in range(8)]
         self.num_of_dec = [0 for i in range(8)]
@@ -189,10 +238,14 @@ class Device:
         # self.reconnection()
         self.state = 0
         self.chan = {i: Channel(self, in_num=i, out_num=i) for i in range(1, 9)}
-        self.init_mb()
 
-    def init_mb(self, br=9600):
-        self.br = br
+    def init_mb(self, br=None, dev_id=None, address=None):
+        if br:
+            self.br = br
+        if dev_id:
+            self.dev_id = [dev_id]
+        if address:
+            self.mb_addr = address
         self.state = self._connect_serial_by_ser_num()
         return self.state
 
@@ -210,7 +263,7 @@ class Device:
                             self.dev_port = com.device
                             try:
                                 self.instrument = minimalmodbus.Instrument(com.device, self.mb_addr, mode="rtu")
-                                self.instrument.debug = False
+                                self.instrument.debug = self.debug
                             except serial.serialutil.SerialException:
                                 return -1
                             return 1
@@ -374,52 +427,6 @@ class Device:
         tmr_ch_str = "{:.2f};\t{:d};\t{:.2f};\t{:.2f};\t{:d};\n"\
             .format(self.temp, self.error, self.set_point, self.hyst, self.out_state)
         return tmr_ch_str
-
-
-# заготовка под OVEN
-def symb_for_tetrad(self, tetrad=0x00):
-    return chr((tetrad & 0x0f) + 0x47)
-
-
-def hash_calc(name="test."):
-    symb_dig_pattern = re.compile(r"[0-9]")
-    symb_lett_pattern = re.compile(r"[A-Za-z]")
-    symb_spec0_pattern = re.compile(r"[-]")
-    symb_spec1_pattern = re.compile(r"[_]")
-    symb_spec2_pattern = re.compile(r"[/]")
-    symb_spec3_pattern = re.compile(r"[ ]")
-    symb_dot_pattern = re.compile(r"[.]")
-    symb_code_list = []
-    for symb in name:
-        if re.findall(symb_dig_pattern, symb):
-            symb_code = ord(symb) - ord("0")
-        elif re.findall(symb_lett_pattern, symb):
-            symb_code = ord(symb) - ord("A") + 10
-        elif re.findall(symb_spec0_pattern, symb):
-            symb_code = ord(symb) - 26
-        elif re.findall(symb_spec1_pattern, symb):
-            symb_code = ord(symb) - 27
-        elif re.findall(symb_spec2_pattern, symb):
-            symb_code = ord(symb) - 28
-        elif re.findall(symb_spec3_pattern, symb):
-            symb_code = ord(symb) - 29
-        else:
-            if re.findall(symb_dot_pattern, symb):
-                symb_code_list[-1] += 1
-                break
-            else:
-                break
-        symb_code_list.append(symb_code * 2)
-    hash = 0
-    for symb_code in symb_code_list:
-        hash = crc_16_oven(symb_code << 1, 7, hash)
-    return hash & 0xFFFF
-    pass
-
-
-def symbs_for_byte(byte=0x00):
-    symbs = (ord(symb_for_tetrad((byte >> 4) & 0x0f))) << 8 + (ord(symb_for_tetrad((byte >> 0) & 0x0f))) << 0
-    return symbs
 
 
 def str_to_list(send_str):  # функция, которая из последовательности шестнадцетиричных слов в строке без
