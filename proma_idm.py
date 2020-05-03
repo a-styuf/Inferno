@@ -99,19 +99,19 @@ class DataFrame(tk.LabelFrame):
 
         self.a_var = tk.StringVar()
         self.a_var.set(self.a)
-        self.a_entry = tk.Entry(self, textvar=self.a_var, bg="gray80", justify="center")
+        self.a_entry = tk.Entry(self, textvar=self.a_var, bg="white", justify="center")
         self.a_entry.place(relx=0.0, x=5, y=90, height=20, relwidth=0.5, width=-10)
 
         self.k_var = tk.StringVar()
         self.k_var.set(self.k)
-        self.k_entry = tk.Entry(self, textvar=self.k_var, bg="gray80", justify="center")
+        self.k_entry = tk.Entry(self, textvar=self.k_var, bg="white", justify="center")
         self.k_entry.place(relx=0.5, x=5, y=90, height=20, relwidth=0.5, width=-10)
         # переподключиться
         self.reconnect_button = tk.Button(self, text='Подключение', command=self.reconnect, bg="gray80")
         self.reconnect_button.place(relx=0.0, x=5, y=150, height=20, relwidth=0.5, width=-10)
         self.addr_var = tk.StringVar()
         self.addr_var.set(self.addr)
-        self.addr_entry = tk.Entry(self, textvar=self.addr_var, bg="gray80", justify="center")
+        self.addr_entry = tk.Entry(self, textvar=self.addr_var, bg="gray80", justify="center", state="disable")
         self.addr_entry.place(relx=0.5, x=5, y=150, height=20, relwidth=0.5, width=-10)
         # отображение состояния
         self.state_label = tk.Label(self, text=self.name, font=("Helvetica", 10), justify="center")
@@ -119,7 +119,7 @@ class DataFrame(tk.LabelFrame):
         # отображение id AC04
         self.id_var = tk.StringVar()
         self.id_var.set(self.id)
-        self.id_entry = tk.Entry(self, textvar=self.id_var, font=("Helvetica", 10), justify="center")
+        self.id_entry = tk.Entry(self, textvar=self.id_var, font=("Helvetica", 10), justify="center", state="disable")
         self.id_entry.place(relx=1.0, x=-95, y=5, height=20, width=90)
         pass
 
@@ -143,6 +143,8 @@ class DataFrame(tk.LabelFrame):
         try:
             self.a = float(a)
             self.k = float(k)
+            self.proma_idm.a = float(a)
+            self.proma_idm.k = float(k)
         except ValueError:
             pass
         finally:

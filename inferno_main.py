@@ -13,7 +13,7 @@ import mv110
 
 
 debug = False
-version = "v1.3.0"
+version = "v1.3.2"
 
 
 cycle_after_id = 0
@@ -321,6 +321,9 @@ for dev in devices:
 # кнопки
 cycle_start_button = tk.Button(root, text='Запуск цикла', command=cycle_start, bg="gray80")
 cycle_start_button.place(x=-210, relx=1, rely=1, y=-120, height=25, width=200)
+
+save_cfg_button = tk.Button(root, text='Сохранение настроек', command=lambda: save_init_cfg(devices), bg="gray80")
+save_cfg_button.place(x=-210, relx=1, rely=1, y=-150, height=25, width=200)
 
 state_label = tk.Label(root, text="Графики", font=("Helvetica", 10))
 state_label.place(x=-210, relx=1, rely=1, y=-90, height=25, width=200)

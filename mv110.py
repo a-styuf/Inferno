@@ -87,7 +87,7 @@ class DataFrame(tk.LabelFrame):
         # задание id AC04
         self.id_var = tk.StringVar()
         self.id_var.set(self.id)
-        self.id_entry = tk.Entry(self, textvar=self.id_var, font=("Helvetica", 10), justify="center")
+        self.id_entry = tk.Entry(self, textvar=self.id_var, font=("Helvetica", 10), justify="center", state="disable")
         self.id_entry.place(relx=1.0, x=-95, y=5, height=20, width=90)
 
     def set_gui_data(self):
