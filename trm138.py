@@ -29,13 +29,13 @@ class DataFrame(tk.LabelFrame):
         self.root = root
         self.trm138 = Device(debug=self.debug)
         # загрузка параметров
+        self.cfg_dict = None
         self.set_cfg()
         #
         tk.LabelFrame.__init__(self, self.root, kw)
         #
         self.set_gui()
         self.state_check()
-        self.cfg_dict = None
 
     def connect(self):
         self.trm138.init_mb(br=self.br, dev_id=self.id, address=self.addr)
@@ -231,7 +231,6 @@ class Device:
             else:
                 pass
         self.port = None
-        self.debug = True
         self.instrument = None
         self.row_temp = [0 for i in range(8)]
         self.num_of_dec = [0 for i in range(8)]
@@ -242,7 +241,7 @@ class Device:
         self.out_state = [0 for i in range(8)]
         # self.reconnection()
         self.state = 0
-        self.chan = {i: Channel(self, in_num=i, out_num=i) for i in range(1, 9)}
+        # self.chan = {i: Channel(self, in_num=i, out_num=i) for i in range(1, 9)}
 
     def init_mb(self, br=None, dev_id=None, address=None):
         if br:
@@ -261,22 +260,23 @@ class Device:
                 # print(com.serial_number)
                 if com.serial_number is not None:
                     if serial_number in com.serial_number:
+                        self.instrument = None
                         if self.instrument is None:
-                            minimalmodbus.BAUDRATE = self.br
-                            minimalmodbus.CLOSE_PORT_AFTER_EACH_CALL = False
-                            minimalmodbus.TIMEOUT = 0.25
                             self.dev_port = com.device
                             try:
                                 self.instrument = minimalmodbus.Instrument(com.device, self.mb_addr, mode="rtu")
-                                self.instrument.debug = self.debug
+                                self.instrument.debug = True  # self.debug
+                                self.instrument.close_port_after_each_call = False
+                                self.instrument.serial.baudrate = self.br
+                                self.instrument.serial.timeout = 0.25
                             except serial.serialutil.SerialException:
                                 return -1
                             return 1
         self.state = -1
 
-    def chan_conf(self, num=1,  in_num=1, out_num=1):
-        self.chan[num].in_num = in_num
-        self.chan[num].out_num = out_num
+    # def chan_conf(self, num=1,  in_num=1, out_num=1):
+    #     self.chan[num].in_num = in_num
+    #     self.chan[num].out_num = out_num
 
     def read(self, d_type="temp", ch=1):
         data = None
@@ -327,11 +327,7 @@ class Device:
         return data
 
     def read_temp(self, ch=1):
-        self.read(d_type="numberOfDecimal", ch=ch)
-
-        self.read(d_type="temp", ch=ch)
-        # print(ch, self.num_of_dec[ch - 1], self.row_temp[ch - 1])
-        self.temp[ch-1] = self.row_temp[ch-1]/(10**self.num_of_dec[ch-1])
+        self.read(d_type="temp_fp", ch=ch)
         pass
 
     def write(self, data, d_type="set_point", ch=1):
@@ -387,8 +383,6 @@ class Device:
 
     def read_all_temp(self):
         for i in range(1, 9):
-            # self.write(0, d_type="numberOfDecimal", ch=i)
-            # self.read_temp(ch=i)
             self.read(d_type="temp_fp", ch=i)
             time.sleep(0.05)
         pass
@@ -449,17 +443,6 @@ def bytes_array_to_str(bytes_array):
         byte_str = (" %02X" % bytes_array[i])
         bytes_string += byte_str
     return bytes_string
-
-
-def crc_16_oven(byte, num_bit, CRC):
-    for i in range(num_bit):
-        byte <<= 1
-        if (byte ^ (CRC>>8)) & 0x08:
-            CRC <<= 1
-            CRC ^= 0x8F57
-        else:
-            CRC <<= 1
-    return CRC
 
 
 # описание отдельной клетки будущей таблицы #

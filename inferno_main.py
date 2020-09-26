@@ -124,7 +124,7 @@ def cycle_body():
 
 def form_graph_data():
     global graph_data
-    graph_data[0][1].append(round(time.clock(), 3))  # давление первой помы
+    graph_data[0][1].append(round(time.perf_counter(), 3))  # давление первой помы
     graph_data[1][1].append(proma1_frame.proma_idm.consumption)  # давление первой помы
     graph_data[2][1].append(proma2_frame.proma_idm.consumption)  # давление второй помы
     graph_data[3][1].append(pvm_frame.mass)  # давление второй помы
@@ -139,7 +139,7 @@ def form_graph_data():
 
 def form_air_graph_data():
     global air_graph_data
-    air_graph_data[0][1].append(round(time.clock(), 3))  # давление первой помы
+    air_graph_data[0][1].append(round(time.perf_counter(), 3))  # давление первой помы
     air_graph_data[1][1].append(air_analyser_frame.o2_prc)
     air_graph_data[2][1].append(air_analyser_frame.co_prc)
     air_graph_data[3][1].append(air_analyser_frame.h2_prc)
@@ -314,6 +314,7 @@ for dev in devices:
     try:
         dev.set_cfg(inferno_config[dev.name])
         print("Inferno: to %s set cfg: " % dev.name, str(inferno_config[dev.name]))
+        print(' '.join(["%s: <%s> " % (str(var), str(inferno_config[dev.name][var])) for var in inferno_config[dev.name]]))
         dev.connect()
     except Exception as error:
         print(error)

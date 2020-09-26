@@ -29,6 +29,7 @@ class DataFrame(tk.LabelFrame):
         self.root = root
         self.mv110 = Device(debug=self.debug)
         # загрузка параметров
+        self.cfg_dict = None
         self.set_cfg()
         #
         tk.LabelFrame.__init__(self, self.root, kw)
@@ -37,7 +38,6 @@ class DataFrame(tk.LabelFrame):
         #
         self.set_gui()
         self.state_check()
-        self.cfg_dict = None
 
     def connect(self):
         self.mv110.init_mb(br=self.br, dev_id=self.id, address=self.addr)
@@ -162,6 +162,7 @@ class Device:
                 # print(com.serial_number)
                 if com.serial_number is not None:
                     if serial_number in com.serial_number:
+                        self.instrument = None
                         if self.instrument is None:
                             self.dev_port = com.device
                             try:
