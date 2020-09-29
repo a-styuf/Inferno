@@ -265,7 +265,7 @@ class Device:
                             self.dev_port = com.device
                             try:
                                 self.instrument = minimalmodbus.Instrument(com.device, self.mb_addr, mode="rtu")
-                                self.instrument.debug = True  # self.debug
+                                self.instrument.debug = self.debug
                                 self.instrument.close_port_after_each_call = False
                                 self.instrument.serial.baudrate = self.br
                                 self.instrument.serial.timeout = 0.25

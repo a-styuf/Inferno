@@ -32,7 +32,7 @@ class DataFrame(tk.LabelFrame):
             else:
                 pass
         self.root = root
-        self.proma_idm = Data(proma_id=self.id, addr=self.addr, a=self.a, k=self.k)
+        self.proma_idm = Data(proma_id=self.id, addr=self.addr, a=self.a, k=self.k, debug=self.debug)
         tk.LabelFrame.__init__(self, self.root, kw)
         self.set_cfg()
         self.set_gui()
@@ -191,11 +191,12 @@ class DataFrame(tk.LabelFrame):
 
 
 class Data:
-    def __init__(self, proma_id="013B3AB7", addr=2, a=6.9513, k=0.4851):
+    def __init__(self, proma_id="013B3AB7", debug=False, addr=2, a=6.9513, k=0.4851):
         self.instrument = None
         self.a = a  # коэффициенты пересчета давления в расход по формуле Cons[m3/h]=a*(P[kPa]**k)
         self.k = k
         self.mb_addr = addr  # здесь и далее: mb - ModeBus
+        self.debug = debug
         self.dev_port = None
         self.dev_br = None
         self.dev_id = [proma_id]
